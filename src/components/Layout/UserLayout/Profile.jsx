@@ -21,7 +21,7 @@ const userDataMock = {
 
 const ProfileCard = ({ data = userDataMock }) => {
   return (
-    <Card className="flex-col md:flex-row w-full max-w-[75rem] p-5 items-center shadow-sm border border-gray-100 gap-4">
+    <Card className="flex-col md:flex-row w-full max-w-[75rem] p-5 items-center shadow-sm border border-gray-100 gap-4 mb-10">
       <CardHeader
         shadow={false}
         floated={false}
