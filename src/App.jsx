@@ -12,6 +12,8 @@ import AdminLayout from "./components/Layout/AdminLayout/Admin";
 import SubjectDetails from "./pages/Subjects/SubjectDetails";
 import Subjects from "./pages/Subjects/SubjectsList";
 import HistoryDetails from "./pages/History/ExamsHistory";
+import Login from "./pages/Auth/Login";
+import Register from "./pages/Auth/Register";
 
 const App = () => {
   const [view, setView] = useState("user");
@@ -46,6 +48,9 @@ const App = () => {
       </div>
 
       <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+
         <Route
           path="/"
           element={
