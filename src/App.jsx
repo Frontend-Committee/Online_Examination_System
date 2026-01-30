@@ -14,6 +14,9 @@ import Subjects from "./pages/Subjects/SubjectsList";
 import HistoryDetails from "./pages/History/ExamsHistory";
 import Login from "./pages/Auth/Login";
 import Register from "./pages/Auth/Register";
+import RecoverPassword from "./pages/Auth/RecoverPassword";
+import VerifyCode from "./pages/Auth/VerifyCode";
+import ResetPassword from "./pages/Auth/ResetPassword";
 
 const App = () => {
   const [view, setView] = useState("user");
@@ -50,6 +53,9 @@ const App = () => {
       <Routes>
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/recover-password" element={<RecoverPassword />} />
+        <Route path="/verifyCode" element={<VerifyCode />} />
+        <Route path="/resetPassword" element={<ResetPassword />} />
 
         <Route
           path="/"

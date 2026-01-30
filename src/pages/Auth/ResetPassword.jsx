@@ -1,27 +1,37 @@
-
-import { useRef, useState } from "react";
-import { login } from "../../services/authService";
-import { Link } from "react-router-dom";
-import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
-import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
 import SocialLogin from "../../components/Layout/ِِAuthLayout/SocialLogin";
+import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
+import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
+import { useRef, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { forgotPassword, resetPassword } from "../../services/authService";
 
-const Login = () => {
+export default function ResetPassword() {
   const [show, setShow] = useState(false);
-  const emailRef = useRef(null);
-  const passRef = useRef(null);
 
-  const handleLogin = async (e) => {
+  const createPassRef = useRef(null);
+  const reEnterPassRef = useRef(null);
+  const go = useNavigate();
+  const handleResetPassword = async (e) => {
     e.preventDefault();
-    if (!emailRef.current.value || !passRef.current.value) return;
+    if (
+      !createPassRef.current.value ||
+      createPassRef.current.value !== reEnterPassRef.current.value
+    ) {
+      alert("Passwords are required and must match");
+      return;
+    }
+
+    const data = {
+      email: "ahmedmutti@gmail.com",
+      newPassword: createPassRef.current.value.trim(),
+    };
     try {
-      const res = await login({
-        email: emailRef.current.value.trim(),
-        password: passRef.current.value.trim(),
-      });
+      const res = await resetPassword(data);
       console.log(res);
-    } catch (error) {
-      console.log(error.response?.data || error.message);
+      go("/user");
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || "Something went wrong");
     }
   };
 
@@ -33,24 +43,31 @@ const Login = () => {
         <AuthNavbar />
 
         <div className="flex flex-col justify-center flex-grow max-w-md mx-auto w-full">
-          <h2 className="text-2xl font-bold text-black mb-8">Sign in</h2>
+          <h2 className="text-2xl font-bold text-black mb-8">Set a password</h2>
 
-          <form className="flex flex-col gap-5" onSubmit={handleLogin}>
-            <div className="flex flex-col gap-2">
-              <input
-                type="email"
-                placeholder="Enter Email"
-                className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
-                ref={emailRef}
-              />
-            </div>
-
+          <form className="flex flex-col gap-5" onSubmit={handleResetPassword}>
             <div className="relative flex flex-col gap-2">
               <input
                 type={show ? "text" : "password"}
-                placeholder="Password"
+                placeholder="Create Password"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
-                ref={passRef}
+                ref={createPassRef}
+              />
+              <span
+                className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
+                onClick={() => {
+                  setShow(!show);
+                }}
+              >
+                {show ? "Hide" : "Show"}
+              </span>
+            </div>
+            <div className="relative flex flex-col gap-2">
+              <input
+                type={show ? "text" : "password"}
+                placeholder="Re-enter Password"
+                className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
+                ref={reEnterPassRef}
               />
               <span
                 className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
@@ -90,6 +107,4 @@ const Login = () => {
       </div>
     </div>
   );
-};
-
-export default Login;
+}

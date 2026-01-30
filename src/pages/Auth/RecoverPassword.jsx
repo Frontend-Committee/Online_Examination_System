@@ -1,27 +1,23 @@
-
-import { useRef, useState } from "react";
-import { login } from "../../services/authService";
-import { Link } from "react-router-dom";
-import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
-import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
 import SocialLogin from "../../components/Layout/ِِAuthLayout/SocialLogin";
+import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
+import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
+import { useRef } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { forgotPassword } from "../../services/authService";
 
-const Login = () => {
-  const [show, setShow] = useState(false);
+export default function RecoverPassword() {
   const emailRef = useRef(null);
-  const passRef = useRef(null);
-
-  const handleLogin = async (e) => {
+  const go = useNavigate();
+  const handleRecovery = async (e) => {
     e.preventDefault();
-    if (!emailRef.current.value || !passRef.current.value) return;
+    if (!emailRef.current.value) return;
+
     try {
-      const res = await login({
-        email: emailRef.current.value.trim(),
-        password: passRef.current.value.trim(),
-      });
+      const res = await forgotPassword(emailRef.current.value.trim());
       console.log(res);
-    } catch (error) {
-      console.log(error.response?.data || error.message);
+      go("/resetPassword");
+    } catch (err) {
+      console.log(err);
     }
   };
 
@@ -33,9 +29,11 @@ const Login = () => {
         <AuthNavbar />
 
         <div className="flex flex-col justify-center flex-grow max-w-md mx-auto w-full">
-          <h2 className="text-2xl font-bold text-black mb-8">Sign in</h2>
+          <h2 className="text-2xl font-bold text-black mb-8">
+            Forgot your password?
+          </h2>
 
-          <form className="flex flex-col gap-5" onSubmit={handleLogin}>
+          <form className="flex flex-col gap-5" onSubmit={handleRecovery}>
             <div className="flex flex-col gap-2">
               <input
                 type="email"
@@ -43,23 +41,6 @@ const Login = () => {
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
                 ref={emailRef}
               />
-            </div>
-
-            <div className="relative flex flex-col gap-2">
-              <input
-                type={show ? "text" : "password"}
-                placeholder="Password"
-                className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
-                ref={passRef}
-              />
-              <span
-                className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
-                onClick={() => {
-                  setShow(!show);
-                }}
-              >
-                {show ? "Hide" : "Show"}
-              </span>
             </div>
 
             <div className="flex justify-end">
@@ -90,6 +71,4 @@ const Login = () => {
       </div>
     </div>
   );
-};
-
-export default Login;
+}
