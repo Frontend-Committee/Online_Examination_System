@@ -17,6 +17,7 @@ import Register from "./pages/Auth/Register";
 import RecoverPassword from "./pages/Auth/RecoverPassword";
 import VerifyCode from "./pages/Auth/VerifyCode";
 import ResetPassword from "./pages/Auth/ResetPassword";
+import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoutes";
 
 const App = () => {
   const [view, setView] = useState("user");
@@ -63,20 +64,21 @@ const App = () => {
             <Navigate to={view === "user" ? "/user" : "/admin"} replace />
           }
         />
+        <Route element={<ProtectedRoute />}>
+          <Route path="/user" element={<UserLayout />}>
+            <Route index element={<Navigate to="subjects" replace />} />
+            <Route path="subjects" element={<Subjects />} />
+            <Route path="subjects/:subjectId" element={<SubjectDetails />} />
+            <Route path="history" element={<HistoryDetails />} />
 
-        <Route path="/user" element={<UserLayout />}>
-          <Route index element={<Navigate to="subjects" replace />} />
-          <Route path="subjects" element={<Subjects />} />
-          <Route path="subjects/:subjectId" element={<SubjectDetails />} />
-          <Route path="history" element={<HistoryDetails />} />
+            <Route path="history/:subjectId" element={<HistoryDetails />} />
+          </Route>
 
-          <Route path="history/:subjectId" element={<HistoryDetails />} />
-        </Route>
-
-        <Route path="/admin" element={<AdminLayout />}>
-          <Route index element={<Navigate to="subjects" replace />} />
-          <Route path="subjects" element={<Subjects />} />
-          <Route path="subjects/:subjectId" element={<SubjectDetails />} />
+          <Route path="/admin" element={<AdminLayout />}>
+            <Route index element={<Navigate to="subjects" replace />} />
+            <Route path="subjects" element={<Subjects />} />
+            <Route path="subjects/:subjectId" element={<SubjectDetails />} />
+          </Route>
         </Route>
       </Routes>
     </>

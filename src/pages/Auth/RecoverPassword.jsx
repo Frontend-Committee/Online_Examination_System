@@ -1,24 +1,26 @@
 import SocialLogin from "../../components/Layout/ِِAuthLayout/SocialLogin";
 import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
 import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
-import { useRef } from "react";
+import { useContext, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { forgotPassword } from "../../services/authService";
 
 export default function RecoverPassword() {
   const emailRef = useRef(null);
   const go = useNavigate();
+  const [loading, setLoading] = useState(false);
+
   const handleRecovery = async (e) => {
     e.preventDefault();
-    if (!emailRef.current.value) return;
-
+    if (!emailRef.current.value) return alert("Email required");
+    setLoading(true);
     try {
-      const res = await forgotPassword(emailRef.current.value.trim());
-      console.log(res);
-      go("/resetPassword");
+      await forgotPassword(emailRef.current.value.trim());
+      go("/verifyCode", { state: { email: emailRef.current.value.trim() } });
     } catch (err) {
-      console.log(err);
+      alert(err.response?.data?.message || "Failed to send recovery email");
     }
+    setLoading(false);
   };
 
   return (
@@ -53,7 +55,7 @@ export default function RecoverPassword() {
             </div>
 
             <button className="w-full bg-[#4461F2] text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition active:scale-95">
-              Sign in
+              {loading ? "Sending..." : "Send Code"}
             </button>
           </form>
 

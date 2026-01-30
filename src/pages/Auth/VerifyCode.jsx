@@ -1,24 +1,28 @@
 import SocialLogin from "../../components/Layout/ِِAuthLayout/SocialLogin";
 import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
 import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
-import { useRef } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { forgotPassword, verifyCode } from "../../services/authService";
+import { useRef, useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { verifyCode } from "../../services/authService";
 
 export default function VerifyCode() {
   const codeRef = useRef(null);
   const go = useNavigate();
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
+  const email = location.state?.email;
+
   const handleVerify = async (e) => {
     e.preventDefault();
-    if (!codeRef.current.value) return;
-
+    if (!codeRef.current.value) return alert("Code required");
+    setLoading(true);
     try {
-      const res = await verifyCode(codeRef.current.value);
-      console.log(res);
-      go("/setNewPassword");
+      await verifyCode({ email, code: codeRef.current.value.trim() });
+      go("/resetPassword", { state: { email } });
     } catch (err) {
-      console.log(err);
+      alert(err.response?.data?.message || "Invalid Code");
     }
+    setLoading(false);
   };
 
   return (
@@ -55,7 +59,7 @@ export default function VerifyCode() {
             </div>
 
             <button className="w-full bg-[#4461F2] text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition active:scale-95">
-              verify
+              {loading ? "Verifying..." : "Verify Code"}
             </button>
           </form>
 

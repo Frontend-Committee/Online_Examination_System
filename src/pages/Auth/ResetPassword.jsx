@@ -2,37 +2,44 @@ import SocialLogin from "../../components/Layout/ِِAuthLayout/SocialLogin";
 import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
 import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
 import { useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { forgotPassword, resetPassword } from "../../services/authService";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { resetPassword } from "../../services/authService";
 
 export default function ResetPassword() {
-  const [show, setShow] = useState(false);
-
   const createPassRef = useRef(null);
   const reEnterPassRef = useRef(null);
   const go = useNavigate();
+  const location = useLocation();
+  const [loading, setLoading] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const email = location.state?.email;
+
   const handleResetPassword = async (e) => {
     e.preventDefault();
-    if (
-      !createPassRef.current.value ||
-      createPassRef.current.value !== reEnterPassRef.current.value
-    ) {
-      alert("Passwords are required and must match");
-      return;
-    }
+    e.preventDefault();
+    if (!createPassRef.current.value || !reEnterPassRef.current.value)
+      return alert("Password required");
+    if (createPassRef.current.value !== reEnterPassRef.current.value)
+      return alert("Passwords do not match");
+
+    setLoading(true);
 
     const data = {
       email: "ahmedmutti@gmail.com",
       newPassword: createPassRef.current.value.trim(),
     };
     try {
-      const res = await resetPassword(data);
-      console.log(res);
-      go("/user");
+      await resetPassword({
+        email,
+        newPassword: createPassRef.current.value.trim(),
+      });
+      alert("Password reset successful!");
+      go("/login");
     } catch (err) {
-      console.error(err);
-      alert(err.response?.data?.message || "Something went wrong");
+      alert(err.response?.data?.message || "Reset failed");
     }
+    setLoading(false);
   };
 
   return (
@@ -48,7 +55,7 @@ export default function ResetPassword() {
           <form className="flex flex-col gap-5" onSubmit={handleResetPassword}>
             <div className="relative flex flex-col gap-2">
               <input
-                type={show ? "text" : "password"}
+                type={showPass ? "text" : "password"}
                 placeholder="Create Password"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
                 ref={createPassRef}
@@ -56,15 +63,15 @@ export default function ResetPassword() {
               <span
                 className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
                 onClick={() => {
-                  setShow(!show);
+                  setShowPass(!showPass);
                 }}
               >
-                {show ? "Hide" : "Show"}
+                {showPass ? "Hide" : "Show"}
               </span>
             </div>
             <div className="relative flex flex-col gap-2">
               <input
-                type={show ? "text" : "password"}
+                type={showConfirm ? "text" : "password"}
                 placeholder="Re-enter Password"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
                 ref={reEnterPassRef}
@@ -72,24 +79,15 @@ export default function ResetPassword() {
               <span
                 className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
                 onClick={() => {
-                  setShow(!show);
+                  setShowConfirm(!showConfirm);
                 }}
               >
-                {show ? "Hide" : "Show"}
+                {showConfirm ? "Hide" : "Show"}
               </span>
             </div>
 
-            <div className="flex justify-end">
-              <Link
-                to="/recover-password"
-                className="text-[#4461F2] text-sm font-medium hover:underline"
-              >
-                Recover Password ?
-              </Link>
-            </div>
-
             <button className="w-full bg-[#4461F2] text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition active:scale-95">
-              Sign in
+              {loading ? "Resetting..." : "Reset Password"}
             </button>
           </form>
 

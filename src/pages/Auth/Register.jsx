@@ -1,36 +1,64 @@
-import { FcGoogle } from "react-icons/fc";
-import { FaFacebookF, FaApple, FaTwitter } from "react-icons/fa";
-import { useRef, useState } from "react";
-import { Link } from "react-router";
+import { useContext, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { register } from "../../services/authService";
 import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
 import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
 import SocialLogin from "../../components/Layout/ِِAuthLayout/SocialLogin";
+import { AuthContext } from "../../Context/AuthContext";
 
 export default function Register() {
-  const [show, setShow] = useState(false);
+  const { state, dispatch } = useContext(AuthContext);
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const usernameRef = useRef(null);
   const fnameRef = useRef(null);
   const lnameRef = useRef(null);
   const emailRef = useRef(null);
   const passRef = useRef(null);
   const confirmPassRef = useRef(null);
+  const phoneNumberRef = useRef(null);
+  const go = useNavigate();
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
+    if (
+      !usernameRef.current.value ||
+      !fnameRef.current.value ||
+      !lnameRef.current.value ||
+      !emailRef.current.value ||
+      !passRef.current.value ||
+      !confirmPassRef.current.value ||
+      !phoneNumberRef.current.value
+    )
+      return;
+    if (passRef.current.value !== confirmPassRef.current.value) {
+      alert("Passwords do not match");
+      return;
+    }
     const data = {
+      username: usernameRef.current.value.trim(),
       firstname: fnameRef.current.value.trim(),
       lastname: lnameRef.current.value.trim(),
       email: emailRef.current.value.trim(),
       password: passRef.current.value.trim(),
       repassword: confirmPassRef.current.value.trim(),
+      phone: phoneNumberRef.current.value.trim(),
     };
-
+    dispatch({ type: "LOGIN_START" });
     try {
       const res = await register(data);
-      console.log(res);
+      const userData = res.data.user;
+      const token = res.data.token;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(userData));
+
+      dispatch({ type: "LOGIN_SUCCESS", payload: { user: userData, token } });
+      go("/user");
     } catch (error) {
-      console.log(error);
+      dispatch({
+        type: "LOGIN_FAILURE",
+        payload: error.response?.data?.message || "Login Failed",
+      });
     }
   };
 
@@ -45,6 +73,14 @@ export default function Register() {
           <h2 className="text-2xl font-bold text-black mb-8">Sign up</h2>
 
           <form className="flex flex-col gap-5" onSubmit={handleRegister}>
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                placeholder="Username"
+                className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
+                ref={usernameRef}
+              />
+            </div>
             <div className="flex flex-col gap-2">
               <input
                 type="text"
@@ -72,37 +108,44 @@ export default function Register() {
 
             <div className="relative flex flex-col gap-2">
               <input
-                type={show ? "text" : "password"}
-                placeholder="Confirm Password"
+                type={showPass ? "text" : "password"}
+                placeholder="Password"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
                 ref={passRef}
               />
               <span
                 className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
                 onClick={() => {
-                  setShow(!show);
+                  setShowPass(!showPass);
                 }}
               >
-                {show ? "Hide" : "Show"}
+                {showPass ? "Hide" : "Show"}
               </span>
             </div>
             <div className="relative flex flex-col gap-2">
               <input
-                type={show ? "text" : "password"}
-                placeholder="Password"
+                type={showConfirm ? "text" : "password"}
+                placeholder="Confrim Password"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
                 ref={confirmPassRef}
               />
               <span
                 className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
                 onClick={() => {
-                  setShow(!show);
+                  setShowConfirm(!showConfirm);
                 }}
               >
-                {show ? "Hide" : "Show"}
+                {showConfirm ? "Hide" : "Show"}
               </span>
             </div>
-
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                placeholder="Phone Number"
+                className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
+                ref={phoneNumberRef}
+              />
+            </div>
             <div className="flex justify-center items-center gap-2 mb-2">
               <span className="text-md text-[#6C737F]">
                 Already have an account?
@@ -116,7 +159,7 @@ export default function Register() {
             </div>
 
             <button className="w-full bg-[#4461F2] text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition active:scale-95">
-              Create Account
+              {state.loading ? "Loading..." : "Create Account"}
             </button>
           </form>
 
