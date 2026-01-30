@@ -45,7 +45,7 @@ const Login = () => {
       <AuthLeftSide />
 
       <div className="w-full lg:w-1/2 flex flex-col p-8 lg:px-20 relative">
-        <AuthNavbar />
+        <AuthNavbar loginBtn={"Register"} />
 
         <div className="flex flex-col justify-center flex-grow max-w-md mx-auto w-full">
           <h2 className="text-2xl font-bold text-black mb-8">Sign in</h2>
