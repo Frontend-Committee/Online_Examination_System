@@ -1,17 +1,30 @@
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Card, List, ListItem, ListItemPrefix } from "@material-tailwind/react";
 import { BiSolidLogOut } from "react-icons/bi";
 import { FaHistory } from "react-icons/fa";
 import { MdSpaceDashboard } from "react-icons/md";
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { IoClose } from "react-icons/io5";
+import { logout } from "../../../services/authService";
+import { AuthContext } from "../../../Context/AuthContext";
 
 const SideBar = ({ isMobile, closeDrawer }) => {
   const [activeTab, setActiveTab] = useState("dashboard");
   const { pathname } = useLocation();
-
+  const { state, dispatch } = useContext(AuthContext);
+  const go = useNavigate();
   const isSubjectWithId =
     pathname.includes("/user/subjects/") && pathname !== "/user/subjects";
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      dispatch({ type: "LOGOUT" });
+      go("/login");
+    } catch (error) {
+      console.log(error.response?.data?.message);
+    }
+  };
 
   return (
     <Card
@@ -79,10 +92,7 @@ const SideBar = ({ isMobile, closeDrawer }) => {
         </Link>
 
         <ListItem
-          onClick={() => {
-            setActiveTab("logout");
-            if (isMobile) closeDrawer();
-          }}
+          onClick={handleLogout}
           className={`${
             activeTab === "logout" && !isSubjectWithId
               ? "bg-main-blue text-white hover:bg-main-blue active:bg-main-blue focus:bg-main-blue focus:text-white"
@@ -94,7 +104,7 @@ const SideBar = ({ isMobile, closeDrawer }) => {
               className={`w-5 h-5 ${activeTab === "logout" && !isSubjectWithId ? "text-white" : "text-main-blue"}`}
             />
           </ListItemPrefix>
-          <span className="font-medium">Log Out</span>
+          <button className="font-medium">Log Out</button>
         </ListItem>
       </List>
     </Card>
