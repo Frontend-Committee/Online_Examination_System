@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import {
   Typography,
   Card,
@@ -10,189 +9,35 @@ import {
   IconButton,
 } from "@material-tailwind/react";
 import { XMarkIcon } from "@heroicons/react/24/outline";
+import { getUserHistory } from "../../services/historyService";
 
 const HistoryDetails = () => {
-  const { subjectId } = useParams();
-  const [subjectData, setSubjectData] = useState(null);
+  const [historyList, setHistoryList] = useState([]);
   const [loading, setLoading] = useState(true);
   const [open, setOpen] = useState(false);
-  const [selectedTopic, setSelectedTopic] = useState(null);
+  const [selectedHistory, setSelectedHistory] = useState(null);
 
-  const handleOpen = (topic = null) => {
-    setSelectedTopic(topic);
+  const handleOpen = (item = null) => {
+    setSelectedHistory(item);
     setOpen(!open);
   };
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const mockData = {
-        1: {
-          name: "Front-End Quiz",
-          sections: [
-            {
-              title: "Front-End Quiz",
-              topics: [
-                {
-                  id: "t1",
-                  name: "HTML",
-                  questions: 20,
-                  duration: 15,
-                  icon: "/assets/icons/html.png",
-                  result: "18 corrected answers in 12 min.",
-                  details: [
-                    {
-                      q: "What does HTML stand for?",
-                      options: [
-                        "Hyper Text Markup Language",
-                        "Home Tool Markup Language",
-                        "Hyperlinks and Text Markup Language",
-                      ],
-                      correct: 0,
-                      user: 0,
-                    },
-                    {
-                      q: "Who is making the Web standards?",
-                      options: [
-                        "Google",
-                        "Microsoft",
-                        "The World Wide Web Consortium",
-                      ],
-                      correct: 2,
-                      user: 2,
-                    },
-                    {
-                      q: "Choose the correct HTML element for the largest heading:",
-                      options: ["<heading>", "<h1>", "<h6>"],
-                      correct: 1,
-                      user: 1,
-                    },
-                    {
-                      q: "What is the correct HTML element for inserting a line break?",
-                      options: ["<br>", "<lb>", "<break>"],
-                      correct: 0,
-                      user: 2,
-                    },
-                  ],
-                },
-                {
-                  id: "t2",
-                  name: "Css",
-                  questions: 20,
-                  duration: 15,
-                  icon: "/assets/icons/css.png",
-                  result: "18 corrected answers in 14 min.",
-                  details: [
-                    {
-                      q: "What does CSS stand for?",
-                      options: [
-                        "Computer Style Sheets",
-                        "Cascading Style Sheets",
-                        "Creative Style Sheets",
-                      ],
-                      correct: 1,
-                      user: 1,
-                    },
-                    {
-                      q: "Which HTML tag is used to define an internal style sheet?",
-                      options: ["<css>", "<script>", "<style>"],
-                      correct: 2,
-                      user: 0,
-                    },
-                    {
-                      q: "Which HTML attribute is used to define inline styles?",
-                      options: ["font", "styles", "style"],
-                      correct: 2,
-                      user: 2,
-                    },
-                  ],
-                },
-                {
-                  id: "t3",
-                  name: "Bootstrap",
-                  questions: 20,
-                  duration: 15,
-                  icon: "/assets/icons/bootstrap.png",
-                  result: "18 corrected answers in 14 min.",
-                  details: [
-                    {
-                      q: "Bootstrap 5 uses which language for styling?",
-                      options: ["Less", "Sass", "Stylus"],
-                      correct: 1,
-                      user: 1,
-                    },
-                  ],
-                },
-                {
-                  id: "t4",
-                  name: "JavaScript",
-                  questions: 20,
-                  duration: 15,
-                  icon: "/assets/icons/js.png",
-                  result: "18 corrected answers in 10 min.",
-                  details: [
-                    {
-                      q: "Inside which HTML element do we put the JavaScript?",
-                      options: ["<js>", "<script>", "<javascript>"],
-                      correct: 1,
-                      user: 1,
-                    },
-                  ],
-                },
-              ],
-            },
-            {
-              title: "Framework Quiz",
-              topics: [
-                {
-                  id: "t5",
-                  name: "Angular",
-                  questions: 20,
-                  duration: 15,
-                  icon: "/assets/icons/angular.png",
-                  result: "18 corrected answers in 10 min.",
-                  details: [
-                    {
-                      q: "Which decorator is used for a class to be an Angular component?",
-                      options: ["@Component", "@Directive", "@Injectable"],
-                      correct: 0,
-                      user: 0,
-                    },
-                  ],
-                },
-                {
-                  id: "t6",
-                  name: "React",
-                  questions: 20,
-                  duration: 15,
-                  icon: "/assets/icons/react.png",
-                  result: "18 corrected answers in 14 min.",
-                  details: [
-                    {
-                      q: "What is the correct command to create a new React project?",
-                      options: [
-                        "npx create-react-app my-app",
-                        "npm install react",
-                        "npx create-app",
-                      ],
-                      correct: 0,
-                      user: 0,
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      };
-
-      setTimeout(() => {
-        setSubjectData(mockData[subjectId || 1]);
+    const fetchHistory = async () => {
+      try {
+        setLoading(true);
+        const res = await getUserHistory();
+        if (res.data && res.data.history) {
+          setHistoryList(res.data.history);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
         setLoading(false);
-      }, 500);
+      }
     };
-    fetchData();
-  }, [subjectId]);
+    fetchHistory();
+  }, []);
 
   if (loading)
     return (
@@ -203,63 +48,66 @@ const HistoryDetails = () => {
 
   return (
     <div className="w-full space-y-6">
-      <div className="pb-10 space-y-8">
-        {subjectData?.sections.map((section, sIndex) => (
-          <div key={sIndex} className="space-y-4">
-            <Typography variant="h6" className="ml-2 font-bold text-Gray">
-              {section.title}
-            </Typography>
+      <div className="pb-10 space-y-4">
+        <Typography
+          variant="h6"
+          className="ml-2 font-bold tracking-wider uppercase text-main-blue"
+        >
+          Your Learning History
+        </Typography>
 
-            <div className="space-y-4">
-              {section.topics.map((topic) => (
-                <Card
-                  key={topic.id}
-                  className="flex flex-row items-center justify-between p-4 bg-white border shadow-sm border-gray-50 rounded-2xl"
-                >
-                  <div className="flex items-center gap-5">
-                    <div className="flex items-center justify-center w-16 h-16 overflow-hidden rounded-xl">
-                      <img
-                        src={topic.icon}
-                        alt={topic.name}
-                        className="object-contain w-full h-full"
-                      />
-                    </div>
-                    <div>
-                      <Typography variant="h6" className="font-bold text-Gray">
-                        {topic.name}
-                      </Typography>
-                      <Typography
-                        variant="small"
-                        className="font-medium text-gray-500"
-                      >
-                        {topic.questions} Question
-                      </Typography>
-                      <Typography className="text-[11px] font-medium text-main-blue mt-1">
-                        {topic.result}
-                      </Typography>
-                    </div>
+        <div className="space-y-4">
+          {historyList.length > 0 ? (
+            historyList.map((item) => (
+              <Card
+                key={item._id}
+                className="flex flex-row items-center justify-between p-4 bg-white border shadow-sm border-gray-50 rounded-2xl"
+              >
+                <div className="flex items-center gap-5">
+                  <div className="flex items-center justify-center w-16 h-16 overflow-hidden rounded-xl bg-gray-50">
+                    <img
+                      src="/assets/icons/Logo.png"
+                      alt={item.exam?.title}
+                      className="object-contain w-full h-full"
+                    />
                   </div>
-
-                  <div className="flex flex-col items-end gap-1">
+                  <div>
+                    <Typography variant="h6" className="font-bold text-Gray">
+                      {item.exam?.title}
+                    </Typography>
                     <Typography
                       variant="small"
-                      className="mr-2 font-semibold text-gray-700"
+                      className="font-medium text-gray-500"
                     >
-                      {topic.duration} Minutes
+                      Score: {item.correctAnswers} / {item.totalQuestions}
                     </Typography>
-                    <Button
-                      onClick={() => handleOpen(topic)}
-                      size="sm"
-                      className="bg-main-blue capitalize py-1.5 px-6 rounded-lg text-xs font-normal shadow-none"
-                    >
-                      Answers
-                    </Button>
+                    
                   </div>
-                </Card>
-              ))}
+                </div>
+
+                <div className="flex flex-col items-end gap-1">
+                  <Typography
+                    variant="small"
+                    className="mr-2 font-semibold text-gray-700"
+                  >
+                   in time: {item.time} min
+                  </Typography>
+                  <Button
+                    onClick={() => handleOpen(item)}
+                    size="sm"
+                    className="bg-main-blue capitalize py-1.5 px-6 rounded-lg text-xs font-normal shadow-none"
+                  >
+                    Details
+                  </Button>
+                </div>
+              </Card>
+            ))
+          ) : (
+            <div className="p-10 text-center text-gray-500">
+              No history found.
             </div>
-          </div>
-        ))}
+          )}
+        </div>
       </div>
 
       <Dialog
@@ -270,7 +118,7 @@ const HistoryDetails = () => {
       >
         <DialogHeader className="relative block m-0">
           <Typography variant="h5" color="blue-gray" className="font-bold">
-            Results of {selectedTopic?.name} Quiz
+            Quiz Details: {selectedHistory?.exam?.title}
           </Typography>
           <IconButton
             size="sm"
@@ -282,18 +130,18 @@ const HistoryDetails = () => {
           </IconButton>
         </DialogHeader>
         <DialogBody className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          {selectedTopic?.details?.map((item, index) => (
+          {selectedHistory?.questions?.map((item, index) => (
             <div
               key={index}
               className="p-4 space-y-3 border border-gray-100 rounded-2xl"
             >
               <Typography className="text-sm font-bold text-gray-800">
-                {item.q}
+                {item.question?.question}
               </Typography>
               <div className="space-y-2">
-                {item.options.map((option, optIdx) => {
-                  const isCorrect = optIdx === item.correct;
-                  const isUserAnswer = optIdx === item.user;
+                {item.question?.answers?.map((option, optIdx) => {
+                  const isCorrect = option.key === item.question?.correct;
+                  const isUserAnswer = option.key === item.userAnswer;
                   const isWrong = isUserAnswer && !isCorrect;
 
                   return (
@@ -304,7 +152,7 @@ const HistoryDetails = () => {
                           ? "bg-green-50 border-green-200"
                           : isWrong
                             ? "bg-red-50 border-red-200"
-                            : "bg-blue-50/30 border-blue-100"
+                            : "bg-gray-50/30 border-gray-100"
                       }`}
                     >
                       <div
@@ -313,7 +161,7 @@ const HistoryDetails = () => {
                             ? "border-green-500 bg-green-500"
                             : isWrong
                               ? "border-red-500 bg-red-500"
-                              : "border-blue-400"
+                              : "border-gray-400"
                         }`}
                       >
                         {(isCorrect || isWrong) && (
@@ -321,9 +169,9 @@ const HistoryDetails = () => {
                         )}
                       </div>
                       <Typography
-                        className={`text-xs font-medium ${isCorrect ? "text-green-700" : isWrong ? "text-red-700" : "text-blue-700"}`}
+                        className={`text-xs font-medium ${isCorrect ? "text-green-700" : isWrong ? "text-red-700" : "text-gray-600"}`}
                       >
-                        {option}
+                        {option.answer}
                       </Typography>
                     </div>
                   );
@@ -332,14 +180,6 @@ const HistoryDetails = () => {
             </div>
           ))}
         </DialogBody>
-        <div className="flex justify-center p-4">
-          <Button
-            className="w-full max-w-xs py-3 bg-main-blue rounded-xl"
-            onClick={() => handleOpen()}
-          >
-            Close
-          </Button>
-        </div>
       </Dialog>
     </div>
   );
