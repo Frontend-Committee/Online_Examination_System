@@ -34,6 +34,19 @@ const authReducer = (state, action) => {
         loading: false,
         isLoggedIn: false,
       };
+    case "REGISTER_SUCCESS":
+      return {
+        ...state,
+        loading: false,
+        error: null,
+      };
+    case "REGISTER_FAILURE":
+      return {
+        ...state,
+        error: action.payload,
+        loading: false,
+        isLoggedIn: false,
+      };
 
     case "LOGOUT":
       localStorage.removeItem("user");
@@ -53,16 +66,6 @@ const authReducer = (state, action) => {
 
 export default function AuthProvider({ children }) {
   const [state, dispatch] = useReducer(authReducer, initialState);
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const user = JSON.parse(localStorage.getItem("user"));
-    if (token && user) {
-      dispatch({ type: "LOGIN_SUCCESS", payload: { user, token } });
-    } else {
-      dispatch({ type: "LOGOUT" });
-    }
-  }, []);
 
   return (
     <AuthContext.Provider value={{ state, dispatch }}>

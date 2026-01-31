@@ -16,7 +16,7 @@ const SideBar = ({ isMobile, closeDrawer }) => {
   return (
     <Card
       className={`w-full p-4 flex flex-col bg-white border-none transition-all duration-300
-    ${isMobile ? "h-auto rounded-b-2xl shadow-none" : "hidden lg:flex h-screen max-w-[15rem] rounded-xl shadow-xl"}
+    ${isMobile ? "h-auto rounded-b-2xl shadow-none" : "hidden lg:flex h-auto max-w-[15rem] rounded-xl shadow-xl"}
   `}
     >
       <div className="flex items-center justify-between p-4 mb-6">

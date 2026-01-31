@@ -1,119 +1,108 @@
 import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { Typography, Card } from "@material-tailwind/react";
+import { Typography, Card, Button } from "@material-tailwind/react";
 import TakeExam from "../Exams/TakeExam";
+import { getExamsBySubject } from "../../services/examService";
+import { getSubjectById } from "../../services/subjectService";
+import { jwtDecode } from "jwt-decode";
 
 const SubjectDetails = () => {
   const { subjectId } = useParams();
-  const [subjectData, setSubjectData] = useState(null);
+  const [exams, setExams] = useState([]);
+  const [subjectName, setSubjectName] = useState("");
   const [loading, setLoading] = useState(true);
+  const [userRole, setUserRole] = useState("user");
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      const mockData = {
-        1: {
-          name: "Front-End Quiz",
-          sections: [
-            {
-              title: "Front-End Quiz",
-              topics: [
-                {
-                  id: "t1",
-                  name: "HTML",
-                  questions: 20,
-                  duration: 5,
-                  icon: "/assets/icons/html.png",
-                },
-                {
-                  id: "t2",
-                  name: "Css",
-                  questions: 20,
-                  duration: 15,
-                  icon: "/assets/icons/css.png",
-                },
-                {
-                  id: "t3",
-                  name: "Bootstrap",
-                  questions: 20,
-                  duration: 15,
-                  icon: "/assets/icons/bootstrap.png",
-                },
-                {
-                  id: "t4",
-                  name: "JavaScript",
-                  questions: 20,
-                  duration: 15,
-                  icon: "/assets/icons/js.png",
-                },
-              ],
-            },
-            {
-              title: "Framework Quiz",
-              topics: [
-                {
-                  id: "t5",
-                  name: "Angular",
-                  questions: 20,
-                  duration: 15,
-                  icon: "/assets/icons/angular.png",
-                },
-                {
-                  id: "t6",
-                  name: "React",
-                  questions: 20,
-                  duration: 15,
-                  icon: "/assets/icons/react.png",
-                },
-              ],
-            },
-          ],
-        },
-      };
+    const token = localStorage.getItem("token");
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        setUserRole(decoded.role);
+      } catch (err) {
+        console.error("Invalid token");
+      }
+    }
 
-      setTimeout(() => {
-        setSubjectData(mockData[subjectId]);
+    const fetchAllData = async (id) => {
+      if (!id) return;
+
+      try {
+        setLoading(true);
+        const subjectRes = await getSubjectById(id);
+        console.log("Subject API Response:", subjectRes.data);
+
+        const sName = subjectRes.data?.category?.name;
+        if (sName) {
+          setSubjectName(sName);
+        }
+
+        const examsRes = await getExamsBySubject(
+          subjectRes.data?.category?._id,
+        );
+        console.log("Exams API Response:", examsRes.data);
+
+        const examsList = examsRes.data?.exams;
+        setExams(examsList);
+      } catch (err) {
+        console.error("Error details:", err.response?.data || err.message);
+      } finally {
         setLoading(false);
-      }, 500);
+      }
     };
-    fetchData();
+    if (subjectId && subjectId !== "undefined") {
+      fetchAllData(subjectId);
+    }
   }, [subjectId]);
 
   if (loading)
-    return <div className="p-10 text-center">Loading Quizzes...</div>;
+    return (
+      <div className="p-10 font-bold text-center text-main-blue">
+        Loading Quizzes...
+      </div>
+    );
 
   return (
     <div className="w-full space-y-6">
       <div className="pb-10 space-y-8">
-        {subjectData?.sections.map((section, sIndex) => (
-          <div key={sIndex} className="space-y-4">
-            <Typography variant="h6" className="ml-2 font-bold text-Gray">
-              {section.title}
-            </Typography>
+        <div className="space-y-4">
+          <Typography
+            variant="h6"
+            className="ml-2 font-bold tracking-wider uppercase text-main-blue"
+          >
+            {subjectName || "Available Quizzes"}
+          </Typography>
 
-            <div className="space-y-4">
-              {section.topics.map((topic) => (
+          <div className="space-y-4">
+            {exams.length > 0 ? (
+              exams.map((exam) => (
                 <Card
-                  key={topic.id}
+                  key={exam._id}
                   className="flex flex-row items-center justify-between p-4 bg-white border shadow-sm border-gray-50 rounded-2xl"
                 >
                   <div className="flex items-center gap-5">
-                    <div className="flex items-center justify-center w-16 h-16 overflow-hidden rounded-xl">
+                    <div className="flex items-center justify-center w-16 h-16 overflow-hidden border border-gray-100 rounded-xl bg-gray-50">
                       <img
-                        src={topic.icon}
-                        alt={topic.name}
+                        src={exam.img || exam.icon || "/assets/icons/Logo.png"}
+                        alt={exam.title}
                         className="object-contain w-full h-full"
+                        onError={(e) => {
+                          e.target.src = "/assets/icons/Logo.png";
+                        }}
                       />
                     </div>
                     <div>
-                      <Typography variant="h6" className="font-bold text-Gray">
-                        {topic.name}
+                      <Typography
+                        variant="h6"
+                        className="font-bold text-blue-gray-800"
+                      >
+                        {exam.title}
                       </Typography>
                       <Typography
                         variant="small"
                         className="font-medium text-gray-500"
                       >
-                        {topic.questions} Question
+                        {exam.numberOfQuestions} Questions
                       </Typography>
                     </div>
                   </div>
@@ -123,15 +112,29 @@ const SubjectDetails = () => {
                       variant="small"
                       className="mr-2 font-semibold text-gray-700"
                     >
-                      {topic.duration} Minutes
+                      {exam.duration} Minutes
                     </Typography>
-                    <TakeExam topicData={topic} />
+
+                    {userRole === "admin" ? (
+                      <Button
+                        size="sm"
+                        className="px-4 capitalize rounded-lg bg-main-blue"
+                      >
+                        Add Questions
+                      </Button>
+                    ) : (
+                      <TakeExam topicData={exam} />
+                    )}
                   </div>
                 </Card>
-              ))}
-            </div>
+              ))
+            ) : (
+              <div className="py-10 text-center text-gray-500">
+                No quizzes available for {subjectName}.
+              </div>
+            )}
           </div>
-        ))}
+        </div>
       </div>
     </div>
   );

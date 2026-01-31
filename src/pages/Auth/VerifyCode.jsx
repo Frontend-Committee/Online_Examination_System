@@ -17,7 +17,7 @@ export default function VerifyCode() {
     if (!codeRef.current.value) return alert("Code required");
     setLoading(true);
     try {
-      await verifyCode({ email, code: codeRef.current.value.trim() });
+      await verifyCode(codeRef.current.value.trim());
       go("/resetPassword", { state: { email } });
     } catch (err) {
       alert(err.response?.data?.message || "Invalid Code");
@@ -26,14 +26,14 @@ export default function VerifyCode() {
   };
 
   return (
-    <div className="min-h-screen w-full flex font-sans">
+    <div className="flex w-full min-h-screen font-sans">
       <AuthLeftSide />
 
-      <div className="w-full lg:w-1/2 flex flex-col p-8 lg:px-20 relative">
+      <div className="relative flex flex-col w-full p-8 lg:w-1/2 lg:px-20">
         <AuthNavbar />
 
-        <div className="flex flex-col justify-center flex-grow max-w-md mx-auto w-full">
-          <h2 className="text-2xl font-bold text-black mb-8">Verify Code</h2>
+        <div className="flex flex-col justify-center flex-grow w-full max-w-md mx-auto">
+          <h2 className="mb-8 text-2xl font-bold text-black">Verify Code</h2>
 
           <form className="flex flex-col gap-5" onSubmit={handleVerify}>
             <div className="flex flex-col gap-2">
@@ -45,7 +45,7 @@ export default function VerifyCode() {
               />
             </div>
 
-            <div className="flex justify-end items-center gap-2">
+            <div className="flex items-center justify-end gap-2">
               <span className="text-md  text-[#6C737F]">
                 Didn't receive a code?
               </span>
@@ -67,7 +67,7 @@ export default function VerifyCode() {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
             </div>
-            <span className="relative bg-white px-4 text-gray-400 text-sm">
+            <span className="relative px-4 text-sm text-gray-400 bg-white">
               Or Continue with
             </span>
           </div>

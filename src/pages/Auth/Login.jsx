@@ -27,8 +27,8 @@ const Login = () => {
       const userData = res.data.user;
       const token = res.data.token;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(userData));
+      // localStorage.setItem("token", token);
+      // localStorage.setItem("user", JSON.stringify(userData));
 
       dispatch({ type: "LOGIN_SUCCESS", payload: { user: userData, token } });
       go("/user");
@@ -41,14 +41,14 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex font-sans">
+    <div className="flex w-full h-screen font-sans">
       <AuthLeftSide />
 
-      <div className="w-full lg:w-1/2 flex flex-col p-8 lg:px-20 relative">
+      <div className="relative flex flex-col w-full p-8 lg:w-1/2 lg:px-20">
         <AuthNavbar loginBtn={"Register"} />
 
-        <div className="flex flex-col justify-center flex-grow max-w-md mx-auto w-full">
-          <h2 className="text-2xl font-bold text-black mb-8">Sign in</h2>
+        <div className="flex flex-col justify-center flex-grow w-full max-w-md mx-auto">
+          <h2 className="mb-8 text-2xl font-bold text-black">Sign in</h2>
 
           <form className="flex flex-col gap-5" onSubmit={handleLogin}>
             <div className="flex flex-col gap-2">
@@ -68,7 +68,7 @@ const Login = () => {
                 ref={passRef}
               />
               <span
-                className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
+                className="absolute text-sm text-gray-600 cursor-pointer right-3 top-5"
                 onClick={() => {
                   setShow(!show);
                 }}
@@ -95,7 +95,7 @@ const Login = () => {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
             </div>
-            <span className="relative bg-white px-4 text-gray-400 text-sm">
+            <span className="relative px-4 text-sm text-gray-400 bg-white">
               Or Continue with
             </span>
           </div>

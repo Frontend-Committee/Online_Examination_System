@@ -37,40 +37,35 @@ export default function Register() {
     }
     const data = {
       username: usernameRef.current.value.trim(),
-      firstname: fnameRef.current.value.trim(),
-      lastname: lnameRef.current.value.trim(),
+      firstName: fnameRef.current.value.trim(),
+      lastName: lnameRef.current.value.trim(),
       email: emailRef.current.value.trim(),
       password: passRef.current.value.trim(),
-      repassword: confirmPassRef.current.value.trim(),
+      rePassword: confirmPassRef.current.value.trim(),
       phone: phoneNumberRef.current.value.trim(),
     };
     dispatch({ type: "LOGIN_START" });
     try {
       const res = await register(data);
-      const userData = res.data.user;
-      const token = res.data.token;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(userData));
-
-      dispatch({ type: "LOGIN_SUCCESS", payload: { user: userData, token } });
-      go("/user");
+      dispatch({ type: "REGISTER_SUCCESS" });
+      go("/login");
     } catch (error) {
       dispatch({
-        type: "LOGIN_FAILURE",
-        payload: error.response?.data?.message || "Login Failed",
+        type: "REGISTER_FAILURE",
+        payload: error.response?.data?.message || "Register Failed",
       });
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex font-sans">
+    <div className="flex w-full min-h-screen font-sans">
       <AuthLeftSide />
 
-      <div className="w-full lg:w-1/2 flex flex-col p-8 lg:px-20 relative">
+      <div className="relative flex flex-col w-full p-8 lg:w-1/2 lg:px-20">
         <AuthNavbar loginBtn={"Login"} />
 
-        <div className="flex flex-col justify-center flex-grow max-w-md mx-auto w-full">
-          <h2 className="text-2xl font-bold text-black mb-8">Sign up</h2>
+        <div className="flex flex-col justify-center flex-grow w-full max-w-md mx-auto">
+          <h2 className="mb-8 text-2xl font-bold text-black">Sign up</h2>
 
           <form className="flex flex-col gap-5" onSubmit={handleRegister}>
             <div className="flex flex-col gap-2">
@@ -114,7 +109,7 @@ export default function Register() {
                 ref={passRef}
               />
               <span
-                className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
+                className="absolute text-sm text-gray-600 cursor-pointer right-3 top-5"
                 onClick={() => {
                   setShowPass(!showPass);
                 }}
@@ -130,7 +125,7 @@ export default function Register() {
                 ref={confirmPassRef}
               />
               <span
-                className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
+                className="absolute text-sm text-gray-600 cursor-pointer right-3 top-5"
                 onClick={() => {
                   setShowConfirm(!showConfirm);
                 }}
@@ -146,7 +141,7 @@ export default function Register() {
                 ref={phoneNumberRef}
               />
             </div>
-            <div className="flex justify-center items-center gap-2 mb-2">
+            <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-md text-[#6C737F]">
                 Already have an account?
               </span>
@@ -167,7 +162,7 @@ export default function Register() {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
             </div>
-            <span className="relative bg-white px-4 text-gray-400 text-sm">
+            <span className="relative px-4 text-sm text-gray-400 bg-white">
               Or Continue with
             </span>
           </div>

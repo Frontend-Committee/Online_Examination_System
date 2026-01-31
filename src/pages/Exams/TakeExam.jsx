@@ -9,67 +9,40 @@ import {
   Radio,
 } from "@material-tailwind/react";
 import { ClockIcon } from "@heroicons/react/24/outline";
+import { getExamById, checkQuestions } from "../../services/examService";
+import toast from "react-hot-toast";
 
 const TakeExam = ({ topicData }) => {
   const [open, setOpen] = useState(false);
   const [isQuizStarted, setIsQuizStarted] = useState(false);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [questions, setQuestions] = useState([]);
+  const [userAnswers, setUserAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(0);
+  const [loading, setLoading] = useState(false);
+
+  const [showScore, setShowScore] = useState(false);
+  const [resultData, setResultData] = useState(null);
 
   useEffect(() => {
-    if (topicData) {
-      const allMockData = {
-        HTML: [
-          {
-            id: 1,
-            question: "What does HTML stand for?",
-            options: [
-              "Hyper Text Markup Language",
-              "Home Tool Markup Language",
-              "Hyperlinks and Text Markup Language",
-              "Hyper Tool Markup Language",
-            ],
-          },
-          {
-            id: 2,
-            question: "Who is making the Web standards?",
-            options: [
-              "Google",
-              "The World Wide Web Consortium",
-              "Microsoft",
-              "Mozilla",
-            ],
-          },
-        ],
-        Css: [
-          {
-            id: 1,
-            question: "What does CSS stand for?",
-            options: [
-              "Creative Style Sheets",
-              "Cascading Style Sheets",
-              "Computer Style Sheets",
-              "Colorful Style Sheets",
-            ],
-          },
-          {
-            id: 2,
-            question:
-              "Where in an HTML document is the correct place to refer to an external style sheet?",
-            options: [
-              "In the <body> section",
-              "In the <head> section",
-              "At the end of the document",
-              "In the <meta> section",
-            ],
-          },
-        ],
-      };
-      setQuestions(allMockData[topicData.name] || []);
-      setTimeLeft(topicData.duration * 60);
-    }
-  }, [topicData]);
+    const fetchExamData = async () => {
+      if (open && topicData?._id) {
+        try {
+          setLoading(true);
+          const res = await getExamById(topicData._id);
+          if (res.data && res.data.exam) {
+            setQuestions(res.data.exam.questions || []);
+            setTimeLeft(topicData.duration * 60);
+          }
+        } catch (err) {
+          console.error(err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+    fetchExamData();
+  }, [open, topicData]);
 
   useEffect(() => {
     let timer;
@@ -78,7 +51,7 @@ const TakeExam = ({ topicData }) => {
         setTimeLeft((prev) => prev - 1);
       }, 1000);
     } else if (timeLeft === 0 && isQuizStarted) {
-      handleOpen();
+      handleFinish();
     }
     return () => clearInterval(timer);
   }, [isQuizStarted, timeLeft]);
@@ -92,15 +65,49 @@ const TakeExam = ({ topicData }) => {
   const handleOpen = () => {
     setOpen(!open);
     setIsQuizStarted(false);
+    setShowScore(false);
     setCurrentQuestionIndex(0);
+    setUserAnswers({});
     if (topicData) setTimeLeft(topicData.duration * 60);
+  };
+
+  const handleOptionChange = (questionId, answerKey) => {
+    setUserAnswers((prev) => ({
+      ...prev,
+      [questionId]: answerKey,
+    }));
+  };
+
+  const handleFinish = async () => {
+    const answersArray = Object.keys(userAnswers).map((qId) => ({
+      questionId: qId,
+      correct: userAnswers[qId],
+    }));
+
+    const payload = {
+      answers: answersArray,
+      time: Math.floor((topicData.duration * 60 - timeLeft) / 60),
+    };
+
+    try {
+      setLoading(true);
+      const res = await checkQuestions(payload);
+
+      setResultData(res.data);
+      setIsQuizStarted(false);
+      setShowScore(true);
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to submit quiz");
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleNext = () => {
     if (currentQuestionIndex < questions.length - 1) {
       setCurrentQuestionIndex(currentQuestionIndex + 1);
     } else {
-      handleOpen();
+      handleFinish();
     }
   };
 
@@ -111,6 +118,10 @@ const TakeExam = ({ topicData }) => {
       setIsQuizStarted(false);
     }
   };
+  const successRate =
+    questions.length > 0
+      ? Math.round((resultData?.correctAnswers / questions.length) * 100)
+      : 0;
 
   return (
     <>
@@ -128,14 +139,77 @@ const TakeExam = ({ topicData }) => {
         size="md"
         className="p-4 rounded-2xl"
       >
-        {!isQuizStarted ? (
+        {loading ? (
+          <div className="p-10 font-bold text-center text-main-blue">
+            Processing...
+          </div>
+        ) : showScore ? (
+          <div className="p-6 text-center">
+            <Typography
+              variant="h5"
+              className="mb-8 font-bold text-left text-blue-gray-900"
+            >
+              Your score
+            </Typography>
+
+            <div className="flex flex-col items-center justify-center gap-10 md:flex-row">
+              <div
+                className="relative flex items-center justify-center w-32 h-32 rounded-full shadow-lg"
+                style={{
+                  background: `conic-gradient(
+        #1e40af  ${successRate}%, 
+        #ef4444 ${successRate}% 100%
+      )`,
+                }}
+              >
+                <div className="absolute flex items-center justify-center w-32 h-32 bg-white rounded-full">
+                  <Typography variant="h4" className="font-bold text-gray-800">
+                    {successRate}%
+                  </Typography>
+                </div>
+              </div>
+
+              <div className="space-y-4 text-left">
+                <div className="flex items-center gap-10">
+                  <Typography className="text-xl font-bold text-blue-800">
+                    Correct
+                  </Typography>
+                  <div className="flex items-center justify-center w-10 h-10 font-bold text-blue-700 border border-blue-600 rounded-full">
+                    {resultData?.correctAnswers}
+                  </div>
+                </div>
+                <div className="flex items-center gap-10">
+                  <Typography className="text-xl font-bold text-red-500">
+                    Incorrect
+                  </Typography>
+                  <div className="flex items-center justify-center w-10 h-10 font-bold text-red-500 border border-red-500 rounded-full">
+                    {resultData?.wrongAnswers}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-4 mt-12">
+              <Button
+                variant="outlined"
+                className="flex-1 py-3 text-blue-600 border-blue-600 rounded-2xl"
+                onClick={handleOpen}
+              >
+                Back
+              </Button>
+              <Button className="flex-1 py-3 bg-blue-600 rounded-2xl">
+                Show results
+              </Button>
+            </div>
+          </div>
+        ) : !isQuizStarted ? (
           <>
             <DialogHeader className="font-bold text-blue-gray-900">
               Instructions
             </DialogHeader>
             <DialogBody>
               <Typography className="mb-4 font-bold text-blue-gray-800">
-                Topic: {topicData?.name}
+                Topic: {topicData?.title}
               </Typography>
               <ul className="space-y-2 font-medium text-gray-700 list-disc list-inside">
                 <li>Total Questions: {questions.length}</li>
@@ -159,7 +233,7 @@ const TakeExam = ({ topicData }) => {
                 Question {currentQuestionIndex + 1}
               </Typography>
               <div
-                className={`flex items-center gap-1 font-bold transition-colors duration-300 ${timeLeft < 300 ? "text-red-500" : "text-green-500"}`}
+                className={`flex items-center gap-1 font-bold transition-colors duration-300 ${timeLeft < 60 ? "text-red-500" : "text-green-500"}`}
               >
                 <ClockIcon className="w-5 h-5" />
                 <span>{formatTime(timeLeft)}</span>
@@ -183,7 +257,7 @@ const TakeExam = ({ topicData }) => {
                 {questions[currentQuestionIndex]?.question}
               </Typography>
               <div className="flex flex-col gap-4">
-                {questions[currentQuestionIndex]?.options.map(
+                {questions[currentQuestionIndex]?.answers?.map(
                   (option, index) => (
                     <label
                       key={`${currentQuestionIndex}-${index}`}
@@ -191,9 +265,19 @@ const TakeExam = ({ topicData }) => {
                     >
                       <Radio
                         name={`quiz-options-${currentQuestionIndex}`}
+                        checked={
+                          userAnswers[questions[currentQuestionIndex]._id] ===
+                          option.key
+                        }
+                        onChange={() =>
+                          handleOptionChange(
+                            questions[currentQuestionIndex]._id,
+                            option.key,
+                          )
+                        }
                         label={
                           <span className="font-medium text-gray-800">
-                            {option}
+                            {option.answer}
                           </span>
                         }
                         color="blue"
