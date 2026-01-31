@@ -30,7 +30,7 @@ export default function VerifyCode() {
       <AuthLeftSide />
 
       <div className="relative flex flex-col w-full p-8 lg:w-1/2 lg:px-20">
-        <AuthNavbar />
+        <AuthNavbar loginBtn={"Login"} />
 
         <div className="flex flex-col justify-center flex-grow w-full max-w-md mx-auto">
           <h2 className="mb-8 text-2xl font-bold text-black">Verify Code</h2>

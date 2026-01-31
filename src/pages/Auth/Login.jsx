@@ -5,6 +5,8 @@ import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
 import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
 import SocialLogin from "../../components/Layout/ِِAuthLayout/SocialLogin";
 import { AuthContext } from "../../Context/AuthContext";
+import toast, { LoaderIcon, Toaster } from "react-hot-toast";
+import { Eye, EyeDisabled } from "@tailgrids/icons";
 
 const Login = () => {
   const { state, dispatch } = useContext(AuthContext);
@@ -26,13 +28,11 @@ const Login = () => {
       });
       const userData = res.data.user;
       const token = res.data.token;
-
-      // localStorage.setItem("token", token);
-      // localStorage.setItem("user", JSON.stringify(userData));
-
       dispatch({ type: "LOGIN_SUCCESS", payload: { user: userData, token } });
+      toast.success("Login Success");
       go("/user");
     } catch (error) {
+      toast.error("Email or Password are wrong");
       dispatch({
         type: "LOGIN_FAILURE",
         payload: error.response?.data?.message || "Login Failed",
@@ -42,9 +42,10 @@ const Login = () => {
 
   return (
     <div className="h-screen w-full flex font-sans">
+      <Toaster position="top-center" />
       <AuthLeftSide />
 
-      <div className="relative flex flex-col w-full p-8 lg:w-1/2 lg:px-20">
+      <div className="relative flex flex-col w-full lg:w-1/2 h-screen px-8 lg:px-20">
         <AuthNavbar loginBtn={"Register"} />
 
         <div className="flex flex-col justify-center flex-grow w-full max-w-md mx-auto">
@@ -73,7 +74,7 @@ const Login = () => {
                   setShow(!show);
                 }}
               >
-                {show ? "Hide" : "Show"}
+                {show ? <Eye /> : <EyeDisabled />}
               </span>
             </div>
 
@@ -87,7 +88,7 @@ const Login = () => {
             </div>
 
             <button className="w-full bg-[#4461F2] text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition active:scale-95">
-              {state.loading ? "Loading" : "Sign in"}
+              {state.loading ? <LoaderIcon className="m-auto" /> : "Sign in"}
             </button>
           </form>
 
