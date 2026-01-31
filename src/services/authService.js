@@ -11,9 +11,12 @@ export const register = (data) => {
 export const forgotPassword = (email) => {
   return axiosInstance.post("/auth/forgotPassword", { email });
 };
-export const verifyCode = (data) => {
-  return axiosInstance.post("/auth/verifyResetCode", data);
+export const verifyCode = (resetCode) => {
+  return axiosInstance.post("/auth/verifyResetCode", { resetCode });
 };
 export const resetPassword = (data) => {
   return axiosInstance.put("/auth/resetPassword", data);
+};
+export const logout = () => {
+  return axiosInstance.get("/auth/logout");
 };

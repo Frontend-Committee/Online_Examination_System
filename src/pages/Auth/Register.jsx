@@ -37,27 +37,22 @@ export default function Register() {
     }
     const data = {
       username: usernameRef.current.value.trim(),
-      firstname: fnameRef.current.value.trim(),
-      lastname: lnameRef.current.value.trim(),
+      firstName: fnameRef.current.value.trim(),
+      lastName: lnameRef.current.value.trim(),
       email: emailRef.current.value.trim(),
       password: passRef.current.value.trim(),
-      repassword: confirmPassRef.current.value.trim(),
+      rePassword: confirmPassRef.current.value.trim(),
       phone: phoneNumberRef.current.value.trim(),
     };
     dispatch({ type: "LOGIN_START" });
     try {
       const res = await register(data);
-      const userData = res.data.user;
-      const token = res.data.token;
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(userData));
-
-      dispatch({ type: "LOGIN_SUCCESS", payload: { user: userData, token } });
-      go("/user");
+      dispatch({ type: "REGISTER_SUCCESS" });
+      go("/login");
     } catch (error) {
       dispatch({
-        type: "LOGIN_FAILURE",
-        payload: error.response?.data?.message || "Login Failed",
+        type: "REGISTER_FAILURE",
+        payload: error.response?.data?.message || "Register Failed",
       });
     }
   };

@@ -27,8 +27,8 @@ const Login = () => {
       const userData = res.data.user;
       const token = res.data.token;
 
-      localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(userData));
+      // localStorage.setItem("token", token);
+      // localStorage.setItem("user", JSON.stringify(userData));
 
       dispatch({ type: "LOGIN_SUCCESS", payload: { user: userData, token } });
       go("/user");
@@ -41,7 +41,7 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen w-full flex font-sans">
+    <div className="h-screen w-full flex font-sans">
       <AuthLeftSide />
 
       <div className="w-full lg:w-1/2 flex flex-col p-8 lg:px-20 relative">

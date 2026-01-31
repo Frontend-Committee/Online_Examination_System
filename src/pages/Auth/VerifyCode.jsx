@@ -17,7 +17,7 @@ export default function VerifyCode() {
     if (!codeRef.current.value) return alert("Code required");
     setLoading(true);
     try {
-      await verifyCode({ email, code: codeRef.current.value.trim() });
+      await verifyCode(codeRef.current.value.trim());
       go("/resetPassword", { state: { email } });
     } catch (err) {
       alert(err.response?.data?.message || "Invalid Code");
