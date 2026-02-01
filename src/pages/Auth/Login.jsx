@@ -7,25 +7,19 @@ import SocialLogin from "../../components/Layout/ِِAuthLayout/SocialLogin";
 import { AuthContext } from "../../Context/AuthContext";
 import toast, { LoaderIcon, Toaster } from "react-hot-toast";
 import { Eye, EyeDisabled } from "@tailgrids/icons";
+import { useForm } from "react-hook-form";
 
 const Login = () => {
+  const { register, handleSubmit } = useForm();
+
   const { state, dispatch } = useContext(AuthContext);
   const [show, setShow] = useState(false);
-  const emailRef = useRef(null);
-  const passRef = useRef(null);
   const go = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if (!emailRef.current.value || !passRef.current.value) return;
-
+  const onSubmit = async (data) => {
     dispatch({ type: "LOGIN_START" });
-
     try {
-      const res = await login({
-        email: emailRef.current.value.trim(),
-        password: passRef.current.value.trim(),
-      });
+      const res = await login(data);
       const userData = res.data.user;
       const token = res.data.token;
       dispatch({ type: "LOGIN_SUCCESS", payload: { user: userData, token } });
@@ -51,13 +45,16 @@ const Login = () => {
         <div className="flex flex-col justify-center flex-grow w-full max-w-md mx-auto">
           <h2 className="mb-8 text-2xl font-bold text-black">Sign in</h2>
 
-          <form className="flex flex-col gap-5" onSubmit={handleLogin}>
+          <form
+            className="flex flex-col gap-5"
+            onSubmit={handleSubmit(onSubmit)}
+          >
             <div className="flex flex-col gap-2">
               <input
                 type="email"
                 placeholder="Enter Email"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
-                ref={emailRef}
+                {...register("email", { required: "Email is required" })}
               />
             </div>
 
@@ -66,7 +63,7 @@ const Login = () => {
                 type={show ? "text" : "password"}
                 placeholder="Password"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
-                ref={passRef}
+                {...register("password", { required: "Password is required" })}
               />
               <span
                 className="absolute text-sm text-gray-600 cursor-pointer right-3 top-5"
