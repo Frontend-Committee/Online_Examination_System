@@ -5,6 +5,11 @@ import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
 import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
 import SocialLogin from "../../components/Layout/ِِAuthLayout/SocialLogin";
 import { AuthContext } from "../../Context/AuthContext";
+import toast, { LoaderIcon, Toaster } from "react-hot-toast";
+import { Eye, EyeDisabled } from "@tailgrids/icons";
+
+const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
 
 export default function Register() {
   const { state, dispatch } = useContext(AuthContext);
@@ -19,6 +24,16 @@ export default function Register() {
   const phoneNumberRef = useRef(null);
   const go = useNavigate();
 
+  const [password, setPassword] = useState("");
+  const [isValidPassword, setIsValidPassword] = useState(null);
+
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+
+    setIsValidPassword(passwordRegex.test(value));
+  };
+
   const handleRegister = async (e) => {
     e.preventDefault();
     if (
@@ -29,10 +44,12 @@ export default function Register() {
       !passRef.current.value ||
       !confirmPassRef.current.value ||
       !phoneNumberRef.current.value
-    )
+    ) {
+      toast.error("Fill all the empty fields");
       return;
+    }
     if (passRef.current.value !== confirmPassRef.current.value) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
       return;
     }
     const data = {
@@ -46,10 +63,12 @@ export default function Register() {
     };
     dispatch({ type: "LOGIN_START" });
     try {
-      const res = await register(data);
+      await register(data);
       dispatch({ type: "REGISTER_SUCCESS" });
+      toast.success("Account is Created Successfully");
       go("/login");
     } catch (error) {
+      toast.error("Something Went Wrong, Try Again");
       dispatch({
         type: "REGISTER_FAILURE",
         payload: error.response?.data?.message || "Register Failed",
@@ -59,9 +78,10 @@ export default function Register() {
 
   return (
     <div className="flex w-full min-h-screen font-sans">
+      <Toaster position="top-center" />
       <AuthLeftSide />
 
-      <div className="relative flex flex-col w-full p-8 lg:w-1/2 lg:px-20">
+      <div className="relative flex flex-col w-full lg:w-1/2 h-screen px-8 lg:px-20">
         <AuthNavbar loginBtn={"Login"} />
 
         <div className="flex flex-col justify-center flex-grow w-full max-w-md mx-auto">
@@ -76,15 +96,13 @@ export default function Register() {
                 ref={usernameRef}
               />
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex  gap-2">
               <input
                 type="text"
                 placeholder="First Name"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
                 ref={fnameRef}
               />
-            </div>
-            <div className="flex flex-col gap-2">
               <input
                 type="text"
                 placeholder="Last Name"
@@ -105,7 +123,17 @@ export default function Register() {
               <input
                 type={showPass ? "text" : "password"}
                 placeholder="Password"
-                className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
+                value={password}
+                onChange={handlePasswordChange}
+                className={`w-full p-4 rounded-xl border
+                            ${
+                              isValidPassword === null
+                                ? "border-gray-200"
+                                : isValidPassword
+                                  ? "border-green-500 focus:border-green-500"
+                                  : "border-red-500 focus:border-red-500"
+                            }
+                            focus:outline-none shadow-sm`}
                 ref={passRef}
               />
               <span
@@ -114,8 +142,18 @@ export default function Register() {
                   setShowPass(!showPass);
                 }}
               >
-                {showPass ? "Hide" : "Show"}
+                {showPass ? <Eye /> : <EyeDisabled />}
               </span>
+              {isValidPassword === false && (
+                <div className="mt-2 w-full bg-red-50 text-red-600 text-sm p-3 rounded-lg shadow">
+                  Password must include uppercase, lowercase, number & special
+                  character
+                </div>
+              )}
+
+              {isValidPassword === true && (
+                <p className="text-sm text-green-600">Strong password</p>
+              )}
             </div>
             <div className="relative flex flex-col gap-2">
               <input
@@ -130,7 +168,7 @@ export default function Register() {
                   setShowConfirm(!showConfirm);
                 }}
               >
-                {showConfirm ? "Hide" : "Show"}
+                {showConfirm ? <Eye /> : <EyeDisabled />}
               </span>
             </div>
             <div className="flex flex-col gap-2">
@@ -154,7 +192,11 @@ export default function Register() {
             </div>
 
             <button className="w-full bg-[#4461F2] text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition active:scale-95">
-              {state.loading ? "Loading..." : "Create Account"}
+              {state.loading ? (
+                <LoaderIcon className="m-auto" />
+              ) : (
+                "Create Account"
+              )}
             </button>
           </form>
 

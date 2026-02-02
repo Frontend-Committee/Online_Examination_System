@@ -18,6 +18,7 @@ import RecoverPassword from "./pages/Auth/RecoverPassword";
 import VerifyCode from "./pages/Auth/VerifyCode";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoutes";
+import Register2 from "./pages/Auth/Register2";
 
 const App = () => {
   const [view, setView] = useState("user");
@@ -53,7 +54,7 @@ const App = () => {
 
       <Routes>
         <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
+        <Route path="/register" element={<Register2 />} />
         <Route path="/recover-password" element={<RecoverPassword />} />
         <Route path="/verifyCode" element={<VerifyCode />} />
         <Route path="/resetPassword" element={<ResetPassword />} />

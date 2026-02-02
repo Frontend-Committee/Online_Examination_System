@@ -5,34 +5,28 @@ import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
 import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
 import SocialLogin from "../../components/Layout/ِِAuthLayout/SocialLogin";
 import { AuthContext } from "../../Context/AuthContext";
+import toast, { LoaderIcon, Toaster } from "react-hot-toast";
+import { Eye, EyeDisabled } from "@tailgrids/icons";
+import { useForm } from "react-hook-form";
 
 const Login = () => {
+  const { register, handleSubmit } = useForm();
+
   const { state, dispatch } = useContext(AuthContext);
   const [show, setShow] = useState(false);
-  const emailRef = useRef(null);
-  const passRef = useRef(null);
   const go = useNavigate();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if (!emailRef.current.value || !passRef.current.value) return;
-
+  const onSubmit = async (data) => {
     dispatch({ type: "LOGIN_START" });
-
     try {
-      const res = await login({
-        email: emailRef.current.value.trim(),
-        password: passRef.current.value.trim(),
-      });
+      const res = await login(data);
       const userData = res.data.user;
       const token = res.data.token;
-
-      // localStorage.setItem("token", token);
-      // localStorage.setItem("user", JSON.stringify(userData));
-
       dispatch({ type: "LOGIN_SUCCESS", payload: { user: userData, token } });
+      toast.success("Login Success");
       go("/user");
     } catch (error) {
+      toast.error("Email or Password are wrong");
       dispatch({
         type: "LOGIN_FAILURE",
         payload: error.response?.data?.message || "Login Failed",
@@ -42,21 +36,25 @@ const Login = () => {
 
   return (
     <div className="flex w-full h-screen font-sans">
+      <Toaster position="top-center" />
       <AuthLeftSide />
 
-      <div className="relative flex flex-col w-full p-8 lg:w-1/2 lg:px-20">
+      <div className="relative flex flex-col w-full h-screen px-8 lg:w-1/2 lg:px-20">
         <AuthNavbar loginBtn={"Register"} />
 
         <div className="flex flex-col justify-center flex-grow w-full max-w-md mx-auto">
           <h2 className="mb-8 text-2xl font-bold text-black">Sign in</h2>
 
-          <form className="flex flex-col gap-5" onSubmit={handleLogin}>
+          <form
+            className="flex flex-col gap-5"
+            onSubmit={handleSubmit(onSubmit)}
+          >
             <div className="flex flex-col gap-2">
               <input
                 type="email"
                 placeholder="Enter Email"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
-                ref={emailRef}
+                {...register("email", { required: "Email is required" })}
               />
             </div>
 
@@ -65,7 +63,7 @@ const Login = () => {
                 type={show ? "text" : "password"}
                 placeholder="Password"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
-                ref={passRef}
+                {...register("password", { required: "Password is required" })}
               />
               <span
                 className="absolute text-sm text-gray-600 cursor-pointer right-3 top-5"
@@ -73,7 +71,7 @@ const Login = () => {
                   setShow(!show);
                 }}
               >
-                {show ? "Hide" : "Show"}
+                {show ? <Eye /> : <EyeDisabled />}
               </span>
             </div>
 
@@ -87,7 +85,7 @@ const Login = () => {
             </div>
 
             <button className="w-full bg-[#4461F2] text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition active:scale-95">
-              {state.loading ? "Loading" : "Sign in"}
+              {state.loading ? <LoaderIcon className="m-auto" /> : "Sign in"}
             </button>
           </form>
 

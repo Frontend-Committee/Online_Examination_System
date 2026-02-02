@@ -27,8 +27,8 @@ export default function RecoverPassword() {
     <div className="min-h-screen w-full flex font-sans">
       <AuthLeftSide />
 
-      <div className="w-full lg:w-1/2 flex flex-col p-8 lg:px-20 relative">
-        <AuthNavbar />
+      <div className="relative flex flex-col w-full lg:w-1/2 h-screen px-8 lg:px-20">
+        <AuthNavbar loginBtn={"Login"} />
 
         <div className="flex flex-col justify-center flex-grow max-w-md mx-auto w-full">
           <h2 className="text-2xl font-bold text-black mb-8">
