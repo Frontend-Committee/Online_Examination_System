@@ -1,79 +1,108 @@
-import { FcGoogle } from "react-icons/fc";
-import { FaFacebookF, FaApple, FaTwitter } from "react-icons/fa";
-import { useRef, useState } from "react";
-import { Link } from "react-router";
+import { useContext, useRef, useState } from "react";
+import { Link, useNavigate } from "react-router";
 import { register } from "../../services/authService";
+import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
+import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
+import SocialLogin from "../../components/Layout/ِِAuthLayout/SocialLogin";
+import { AuthContext } from "../../Context/AuthContext";
+import toast, { LoaderIcon, Toaster } from "react-hot-toast";
+import { Eye, EyeDisabled } from "@tailgrids/icons";
+
+const passwordRegex =
+  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#])[A-Za-z\d@$!%*?&#]{8,}$/;
 
 export default function Register() {
-  const [show, setShow] = useState(false);
+  const { state, dispatch } = useContext(AuthContext);
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const usernameRef = useRef(null);
   const fnameRef = useRef(null);
   const lnameRef = useRef(null);
   const emailRef = useRef(null);
   const passRef = useRef(null);
   const confirmPassRef = useRef(null);
+  const phoneNumberRef = useRef(null);
+  const go = useNavigate();
+
+  const [password, setPassword] = useState("");
+  const [isValidPassword, setIsValidPassword] = useState(null);
+
+  const handlePasswordChange = (e) => {
+    const value = e.target.value;
+    setPassword(value);
+
+    setIsValidPassword(passwordRegex.test(value));
+  };
 
   const handleRegister = async (e) => {
     e.preventDefault();
-
+    if (
+      !usernameRef.current.value ||
+      !fnameRef.current.value ||
+      !lnameRef.current.value ||
+      !emailRef.current.value ||
+      !passRef.current.value ||
+      !confirmPassRef.current.value ||
+      !phoneNumberRef.current.value
+    ) {
+      toast.error("Fill all the empty fields");
+      return;
+    }
+    if (passRef.current.value !== confirmPassRef.current.value) {
+      toast.error("Passwords do not match");
+      return;
+    }
     const data = {
-      firstname: fnameRef.current.value.trim(),
-      lastname: lnameRef.current.value.trim(),
+      username: usernameRef.current.value.trim(),
+      firstName: fnameRef.current.value.trim(),
+      lastName: lnameRef.current.value.trim(),
       email: emailRef.current.value.trim(),
       password: passRef.current.value.trim(),
-      repassword: confirmPassRef.current.value.trim(),
+      rePassword: confirmPassRef.current.value.trim(),
+      phone: phoneNumberRef.current.value.trim(),
     };
-
+    dispatch({ type: "LOGIN_START" });
     try {
-      const res = await register(data);
-      console.log(res);
+      await register(data);
+      dispatch({ type: "REGISTER_SUCCESS" });
+      toast.success("Account is Created Successfully");
+      go("/login");
     } catch (error) {
-      console.log(error);
+      toast.error("Something Went Wrong, Try Again");
+      dispatch({
+        type: "REGISTER_FAILURE",
+        payload: error.response?.data?.message || "Register Failed",
+      });
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex font-sans">
-      <div className="hidden lg:flex w-1/2 bg-[#eff4ff] flex-col justify-between items-start px-16 py-5 relative">
-        <div className="mt-14">
-          <h1 className="text-4xl font-extrabold text-black mb-2">
-            Welcome to
-          </h1>
-          <h1 className="text-5xl font-extrabold text-[#4461F2] mb-6">
-            Elevate
-          </h1>
+    <div className="flex w-full min-h-screen font-sans">
+      <Toaster position="top-center" />
+      <AuthLeftSide />
 
-          <p className="text-black text-lg mb-12 max-w-md leading-relaxed">
-            Quidem autem voluptatibus qui quaerat aspernatur architecto natus
-          </p>
-        </div>
+      <div className="relative flex flex-col w-full lg:w-1/2 h-screen px-8 lg:px-20">
+        <AuthNavbar loginBtn={"Login"} />
 
-        <div className="w-full flex justify-center">
-          <img src="/public/assets/images/bro.png" className="object-fill" />
-        </div>
-      </div>
-
-      <div className="w-full lg:w-1/2 flex flex-col p-8 lg:px-20 relative">
-        <div className="flex justify-end items-center gap-6 mb-16 mt-4">
-          <button className="text-black font-medium">English</button>
-          <button className="text-[#4461F2] font-bold">Sign in</button>
-          <button className="bg-white text-[#4461F2] px-6 py-2 rounded-xl shadow-sm border border-gray-100 font-medium hover:bg-gray-50 transition">
-            Register
-          </button>
-        </div>
-
-        <div className="flex flex-col justify-center flex-grow max-w-md mx-auto w-full">
-          <h2 className="text-2xl font-bold text-black mb-8">Sign up</h2>
+        <div className="flex flex-col justify-center flex-grow w-full max-w-md mx-auto">
+          <h2 className="mb-8 text-2xl font-bold text-black">Sign up</h2>
 
           <form className="flex flex-col gap-5" onSubmit={handleRegister}>
             <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                placeholder="Username"
+                className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
+                ref={usernameRef}
+              />
+            </div>
+            <div className="flex  gap-2">
               <input
                 type="text"
                 placeholder="First Name"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
                 ref={fnameRef}
               />
-            </div>
-            <div className="flex flex-col gap-2">
               <input
                 type="text"
                 placeholder="Last Name"
@@ -92,38 +121,65 @@ export default function Register() {
 
             <div className="relative flex flex-col gap-2">
               <input
-                type={show ? "text" : "password"}
-                placeholder="Confirm Password"
-                className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
+                type={showPass ? "text" : "password"}
+                placeholder="Password"
+                value={password}
+                onChange={handlePasswordChange}
+                className={`w-full p-4 rounded-xl border
+                            ${
+                              isValidPassword === null
+                                ? "border-gray-200"
+                                : isValidPassword
+                                  ? "border-green-500 focus:border-green-500"
+                                  : "border-red-500 focus:border-red-500"
+                            }
+                            focus:outline-none shadow-sm`}
                 ref={passRef}
               />
               <span
-                className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
+                className="absolute text-sm text-gray-600 cursor-pointer right-3 top-5"
                 onClick={() => {
-                  setShow(!show);
+                  setShowPass(!showPass);
                 }}
               >
-                {show ? "Hide" : "Show"}
+                {showPass ? <Eye /> : <EyeDisabled />}
               </span>
+              {isValidPassword === false && (
+                <div className="mt-2 w-full bg-red-50 text-red-600 text-sm p-3 rounded-lg shadow">
+                  Password must include uppercase, lowercase, number & special
+                  character
+                </div>
+              )}
+
+              {isValidPassword === true && (
+                <p className="text-sm text-green-600">Strong password</p>
+              )}
             </div>
             <div className="relative flex flex-col gap-2">
               <input
-                type={show ? "text" : "password"}
-                placeholder="Password"
+                type={showConfirm ? "text" : "password"}
+                placeholder="Confrim Password"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
                 ref={confirmPassRef}
               />
               <span
-                className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
+                className="absolute text-sm text-gray-600 cursor-pointer right-3 top-5"
                 onClick={() => {
-                  setShow(!show);
+                  setShowConfirm(!showConfirm);
                 }}
               >
-                {show ? "Hide" : "Show"}
+                {showConfirm ? <Eye /> : <EyeDisabled />}
               </span>
             </div>
-
-            <div className="flex justify-center items-center gap-2 mb-2">
+            <div className="flex flex-col gap-2">
+              <input
+                type="text"
+                placeholder="Phone Number"
+                className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
+                ref={phoneNumberRef}
+              />
+            </div>
+            <div className="flex items-center justify-center gap-2 mb-2">
               <span className="text-md text-[#6C737F]">
                 Already have an account?
               </span>
@@ -136,7 +192,11 @@ export default function Register() {
             </div>
 
             <button className="w-full bg-[#4461F2] text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition active:scale-95">
-              Create Account
+              {state.loading ? (
+                <LoaderIcon className="m-auto" />
+              ) : (
+                "Create Account"
+              )}
             </button>
           </form>
 
@@ -144,28 +204,12 @@ export default function Register() {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
             </div>
-            <span className="relative bg-white px-4 text-gray-400 text-sm">
+            <span className="relative px-4 text-sm text-gray-400 bg-white">
               Or Continue with
             </span>
           </div>
 
-          <div className="flex justify-center gap-6">
-            <button className="w-14 h-14  flex items-center justify-center bg-white border border-gray-100 rounded-2xl shadow-lg hover:shadow-md transition hover:-translate-y-1">
-              <FcGoogle size={28} />
-            </button>
-
-            <button className="w-14 h-14 flex items-center justify-center bg-white border border-gray-100 rounded-2xl shadow-lg hover:shadow-md transition hover:-translate-y-1">
-              <FaTwitter size={24} className="text-[#1DA1F2]" />
-            </button>
-
-            <button className="w-14 h-14 flex items-center justify-center bg-white border border-gray-100 rounded-2xl shadow-lg hover:shadow-md transition hover:-translate-y-1">
-              <FaFacebookF size={24} className="text-[#1877F2]" />
-            </button>
-
-            <button className="w-14 h-14 flex items-center justify-center bg-white border border-gray-100 rounded-2xl shadow-lg hover:shadow-md transition hover:-translate-y-1">
-              <FaApple size={28} className="text-black" />
-            </button>
-          </div>
+          <SocialLogin />
         </div>
       </div>
     </div>
