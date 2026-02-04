@@ -35,11 +35,11 @@ const Login = () => {
   };
 
   return (
-    <div className="h-screen w-full flex font-sans">
+    <div className="flex w-full h-screen font-sans">
       <Toaster position="top-center" />
       <AuthLeftSide />
 
-      <div className="relative flex flex-col w-full lg:w-1/2 h-screen px-8 lg:px-20">
+      <div className="relative flex flex-col w-full h-screen px-8 lg:w-1/2 lg:px-20">
         <AuthNavbar loginBtn={"Register"} />
 
         <div className="flex flex-col justify-center flex-grow w-full max-w-md mx-auto">

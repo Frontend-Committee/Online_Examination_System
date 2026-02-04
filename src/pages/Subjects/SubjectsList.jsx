@@ -26,6 +26,7 @@ import {
   updateSubject,
 } from "../../services/subjectService";
 import toast, { Toaster } from "react-hot-toast";
+import CardPlaceholder from "../../components/Layout/CardPlaceholder";
 
 const Subjects = () => {
   const { state } = useContext(AuthContext);
@@ -56,6 +57,7 @@ const Subjects = () => {
   }, [state.token]);
 
   const fetchSubjects = async () => {
+    setLoading(true);
     try {
       const res = await getSubjects();
       if (res.data && res.data.subjects) {
@@ -63,6 +65,8 @@ const Subjects = () => {
       }
     } catch (err) {
       console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -139,32 +143,34 @@ const Subjects = () => {
       </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        {subjects?.slice(0, 6).map((sub) => (
-          <div key={sub._id} className="relative group">
-            <Link to={`${sub._id}`} className="block">
-              <QuizCard
-                title={sub.name}
-                bgImage={sub.icon || "/assets/icons/Logo.png"}
-              />
-            </Link>
-            <div className="!absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-              <IconButton
-                size="sm"
-                className="text-blue-600 bg-white/80"
-                onClick={(e) => handleEditOpen(e, sub)}
-              >
-                <PencilSquareIcon className="w-4 h-4" />
-              </IconButton>
-              <IconButton
-                size="sm"
-                className="text-red-600 bg-white/80"
-                onClick={(e) => confirmDelete(e, sub._id)}
-              >
-                <TrashIcon className="w-4 h-4" />
-              </IconButton>
-            </div>
-          </div>
-        ))}
+        {loading
+          ? Array.from({ length: 3 }).map((_, i) => <CardPlaceholder key={i} />)
+          : subjects?.slice(0, 6).map((sub) => (
+              <div key={sub._id} className="relative group">
+                <Link to={`${sub._id}`} className="block">
+                  <QuizCard
+                    title={sub.name}
+                    bgImage={sub.icon || "/assets/icons/Logo.png"}
+                  />
+                </Link>
+                <div className="!absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <IconButton
+                    size="sm"
+                    className="text-blue-600 bg-white/80"
+                    onClick={(e) => handleEditOpen(e, sub)}
+                  >
+                    <PencilSquareIcon className="w-4 h-4" />
+                  </IconButton>
+                  <IconButton
+                    size="sm"
+                    className="text-red-600 bg-white/80"
+                    onClick={(e) => confirmDelete(e, sub._id)}
+                  >
+                    <TrashIcon className="w-4 h-4" />
+                  </IconButton>
+                </div>
+              </div>
+            ))}
       </div>
 
       <Dialog
