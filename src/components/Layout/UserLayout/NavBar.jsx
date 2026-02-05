@@ -3,6 +3,7 @@ import { HiMenuAlt2 } from "react-icons/hi";
 import { useState } from "react";
 import SideBar from "./LeftSide";
 import { Drawer } from "@material-tailwind/react";
+import { Link } from "react-router-dom";
 
 const NavBar = () => {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
@@ -26,12 +27,14 @@ const NavBar = () => {
       </div>
 
       <div className="flex items-center gap-4 px-4 md:gap-6">
-        <button
-          className="hidden lg:block rounded-xl bg-main-blue text-white py-2 px-6 md:px-8 text-base font-semibold shadow-[0px_4px_15px_rgba(5,12,156,0.3)] hover:scale-105 transition-all active:scale-95"
-          type="button"
-        >
-          Start Quiz
-        </button>
+        <Link to="/user/AllExams">
+          <button
+            className="block rounded-xl bg-main-blue text-white py-2 px-6 md:px-8 text-base font-semibold shadow-[0px_4px_15px_rgba(5,12,156,0.3)]  text-center hover:scale-105 transition-all active:scale-95"
+            type="button"
+          >
+            Start Quiz
+          </button>
+        </Link>
 
         <div className="relative w-10 h-10 border-2 border-white rounded-full md:w-12 md:h-12">
           <img

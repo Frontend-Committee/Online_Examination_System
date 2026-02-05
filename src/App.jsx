@@ -19,6 +19,7 @@ import VerifyCode from "./pages/Auth/VerifyCode";
 import ResetPassword from "./pages/Auth/ResetPassword";
 import ProtectedRoute from "./components/ProtectedRoutes/ProtectedRoutes";
 import Register2 from "./pages/Auth/Register2";
+import AllExams from "./pages/Exams/ExamManager";
 
 const App = () => {
   const [view, setView] = useState("user");
@@ -71,8 +72,8 @@ const App = () => {
             <Route path="subjects" element={<Subjects />} />
             <Route path="subjects/:subjectId" element={<SubjectDetails />} />
             <Route path="history" element={<HistoryDetails />} />
-
             <Route path="history/:subjectId" element={<HistoryDetails />} />
+            <Route path="AllExams" element={<AllExams />} />
           </Route>
 
           <Route path="/admin" element={<AdminLayout />}>

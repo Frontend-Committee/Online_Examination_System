@@ -133,7 +133,7 @@ const TopBar = () => {
       </div>
       <div className="flex items-center gap-4 px-4 md:gap-6">
         <button
-          className="hidden lg:block rounded-xl bg-main-blue text-white py-2 px-6 md:px-8 text-base font-semibold shadow-[0px_4px_15px_rgba(5,12,156,0.3)] hover:scale-105 transition-all active:scale-95"
+          className="block rounded-xl bg-main-blue text-white py-2 px-6 md:px-8 text-base font-semibold shadow-[0px_4px_15px_rgba(5,12,156,0.3)] text-center hover:scale-105 transition-all active:scale-95"
           type="button"
           onClick={handleButtonClick}
         >

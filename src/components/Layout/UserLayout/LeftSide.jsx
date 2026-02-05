@@ -14,7 +14,8 @@ const SideBar = ({ isMobile, closeDrawer }) => {
   const { state, dispatch } = useContext(AuthContext);
   const go = useNavigate();
   const isSubjectWithId =
-    pathname.includes("/user/subjects/") && pathname !== "/user/subjects";
+    (pathname.includes("/user/subjects/") && pathname !== "/user/subjects") ||
+    (pathname.includes("/user/AllExams") && pathname !== "/user/AllExams");
 
   const handleLogout = async () => {
     try {

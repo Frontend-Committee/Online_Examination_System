@@ -41,7 +41,7 @@ const HistoryDetails = () => {
 
   if (loading)
     return (
-      <div className="p-10 font-bold text-center text-Gray">
+      <div className="p-10 font-bold text-center text-main-blue">
         Loading History...
       </div>
     );

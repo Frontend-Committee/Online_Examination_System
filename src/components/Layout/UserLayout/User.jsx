@@ -9,7 +9,8 @@ const UserLayout = () => {
 
   const hideProfile =
     location.pathname.includes("subjects/") ||
-    location.pathname.includes("history");
+    location.pathname.includes("history") ||
+    location.pathname.includes("AllExams");
 
   return (
     <div className="flex w-full min-h-screen bg-soft-white">
