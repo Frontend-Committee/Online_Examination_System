@@ -10,7 +10,7 @@ export default function AuthLeftSide() {
       </div>
       <div className="flex-1 flex justify-center items-center">
         <img
-          src="/public/assets/images/bro.png"
+          src="/assets/images/bro.png"
           alt="Illustration"
           className="max-h-[60vh] object-contain"
         />
