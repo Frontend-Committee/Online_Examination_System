@@ -1,67 +1,60 @@
-import { FcGoogle } from "react-icons/fc";
-import { FaFacebookF, FaApple, FaTwitter } from "react-icons/fa";
-import { useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { login } from "../../services/authService";
+import { Link, useNavigate } from "react-router-dom";
+import AuthLeftSide from "../../components/Layout/ِِAuthLayout/AuthLeftSide";
+import AuthNavbar from "../../components/Layout/ِِAuthLayout/AuthNavbar";
+import SocialLogin from "../../components/Layout/ِِAuthLayout/SocialLogin";
+import { AuthContext } from "../../Context/AuthContext";
+import toast, { LoaderIcon, Toaster } from "react-hot-toast";
+import { Eye, EyeDisabled } from "@tailgrids/icons";
+import { useForm } from "react-hook-form";
 
 const Login = () => {
-  const [show, setShow] = useState(false);
-  const emailRef = useRef(null);
-  const passRef = useRef(null);
+  const { register, handleSubmit } = useForm();
 
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    if (!emailRef.current.value || !passRef.current.value) return;
+  const { state, dispatch } = useContext(AuthContext);
+  const [show, setShow] = useState(false);
+  const go = useNavigate();
+
+  const onSubmit = async (data) => {
+    dispatch({ type: "LOGIN_START" });
     try {
-      const res = await login({
-        email: emailRef.current.value.trim(),
-        password: passRef.current.value.trim(),
-      });
-      console.log(res);
+      const res = await login(data);
+      const userData = res.data.user;
+      const token = res.data.token;
+      dispatch({ type: "LOGIN_SUCCESS", payload: { user: userData, token } });
+      toast.success("Login Success");
+      go("/user");
     } catch (error) {
-      console.log(error.response?.data || error.message);
+      toast.error("Email or Password are wrong");
+      dispatch({
+        type: "LOGIN_FAILURE",
+        payload: error.response?.data?.message || "Login Failed",
+      });
     }
   };
 
   return (
-    <div className="min-h-screen w-full flex font-sans">
-      <div className="hidden lg:flex w-1/2 bg-[#eff4ff] flex-col justify-between items-start px-16 py-5 relative">
-        <div className="mt-14">
-          <h1 className="text-4xl font-extrabold text-black mb-2">
-            Welcome to
-          </h1>
-          <h1 className="text-5xl font-extrabold text-[#4461F2] mb-6">
-            Elevate
-          </h1>
+    <div className="flex w-full h-screen font-sans">
+      <Toaster position="top-center" />
+      <AuthLeftSide />
 
-          <p className="text-black text-lg mb-12 max-w-md leading-relaxed">
-            Quidem autem voluptatibus qui quaerat aspernatur architecto natus
-          </p>
-        </div>
+      <div className="relative flex flex-col w-full h-screen px-8 lg:w-1/2 lg:px-20">
+        <AuthNavbar loginBtn={"Register"} />
 
-        <div className="w-full flex justify-center">
-          <img src="/public/assets/images/bro.png" className="object-fill" />
-        </div>
-      </div>
+        <div className="flex flex-col justify-center flex-grow w-full max-w-md mx-auto">
+          <h2 className="mb-8 text-2xl font-bold text-black">Sign in</h2>
 
-      <div className="w-full lg:w-1/2 flex flex-col p-8 lg:px-20 relative">
-        <div className="flex justify-end items-center gap-6 mb-16 mt-4">
-          <button className="text-black font-medium">English</button>
-          <button className="text-[#4461F2] font-bold">Sign in</button>
-          <button className="bg-white text-[#4461F2] px-6 py-2 rounded-xl shadow-sm border border-gray-100 font-medium hover:bg-gray-50 transition">
-            Register
-          </button>
-        </div>
-
-        <div className="flex flex-col justify-center flex-grow max-w-md mx-auto w-full">
-          <h2 className="text-2xl font-bold text-black mb-8">Sign in</h2>
-
-          <form className="flex flex-col gap-5" onSubmit={handleLogin}>
+          <form
+            className="flex flex-col gap-5"
+            onSubmit={handleSubmit(onSubmit)}
+          >
             <div className="flex flex-col gap-2">
               <input
                 type="email"
                 placeholder="Enter Email"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
-                ref={emailRef}
+                {...register("email", { required: "Email is required" })}
               />
             </div>
 
@@ -70,29 +63,29 @@ const Login = () => {
                 type={show ? "text" : "password"}
                 placeholder="Password"
                 className="w-full p-4 bg-white border border-gray-200 rounded-xl focus:outline-none focus:border-[#4461F2] text-black shadow-sm"
-                ref={passRef}
+                {...register("password", { required: "Password is required" })}
               />
               <span
-                className="absolute right-3 top-5 text-sm text-gray-600 cursor-pointer"
+                className="absolute text-sm text-gray-600 cursor-pointer right-3 top-5"
                 onClick={() => {
                   setShow(!show);
                 }}
               >
-                {show ? "Hide" : "Show"}
+                {show ? <Eye /> : <EyeDisabled />}
               </span>
             </div>
 
             <div className="flex justify-end">
-              <a
-                href="#"
+              <Link
+                to="/recover-password"
                 className="text-[#4461F2] text-sm font-medium hover:underline"
               >
                 Recover Password ?
-              </a>
+              </Link>
             </div>
 
             <button className="w-full bg-[#4461F2] text-white font-bold py-4 rounded-xl hover:bg-blue-700 transition active:scale-95">
-              Sign in
+              {state.loading ? <LoaderIcon className="m-auto" /> : "Sign in"}
             </button>
           </form>
 
@@ -100,28 +93,12 @@ const Login = () => {
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200"></div>
             </div>
-            <span className="relative bg-white px-4 text-gray-400 text-sm">
+            <span className="relative px-4 text-sm text-gray-400 bg-white">
               Or Continue with
             </span>
           </div>
 
-          <div className="flex justify-center gap-6">
-            <button className="w-14 h-14  flex items-center justify-center bg-white border border-gray-100 rounded-2xl shadow-lg hover:shadow-md transition hover:-translate-y-1">
-              <FcGoogle size={28} />
-            </button>
-
-            <button className="w-14 h-14 flex items-center justify-center bg-white border border-gray-100 rounded-2xl shadow-lg hover:shadow-md transition hover:-translate-y-1">
-              <FaTwitter size={24} className="text-[#1DA1F2]" />
-            </button>
-
-            <button className="w-14 h-14 flex items-center justify-center bg-white border border-gray-100 rounded-2xl shadow-lg hover:shadow-md transition hover:-translate-y-1">
-              <FaFacebookF size={24} className="text-[#1877F2]" />
-            </button>
-
-            <button className="w-14 h-14 flex items-center justify-center bg-white border border-gray-100 rounded-2xl shadow-lg hover:shadow-md transition hover:-translate-y-1">
-              <FaApple size={28} className="text-black" />
-            </button>
-          </div>
+          <SocialLogin />
         </div>
       </div>
     </div>
